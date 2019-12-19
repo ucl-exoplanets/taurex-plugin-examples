@@ -1,9 +1,9 @@
 from taurex.temperature import TemperatureProfile
 from taurex.core import fitparam
-import numpy as np
+from taurex_fortran_plugin.external import temp_fort
 
 
-class ExampleTemperature(TemperatureProfile):
+class ExampleFortranTemperature(TemperatureProfile):
     """
     An example implementation of a temperature profile
 
@@ -13,6 +13,11 @@ class ExampleTemperature(TemperatureProfile):
 
     This is completely arbitrary and has no physical
     meaning but serves as an example of how one could implement it
+
+    This is being done in FORTRAN code in src/temp_fort
+    we generate a pyf file for the portion of the code we expose
+    and then gain access to the 
+
 
     We will also create a fitting parameter "A_temp"
     with a log space default to fit the A_parameter
@@ -57,8 +62,13 @@ class ExampleTemperature(TemperatureProfile):
         super().initialize_profile(planet, nlayers, pressure_profile)
 
         # Now we perform our computation
+        # Here we dont need to put in result and nlayers as f2py
+        # Already figures out the nlayers from pressure profile
+        # and converts the intent out into a function return
         self._temperature_array = \
-            self._A_param * np.exp(self._damping * np.log10(pressure_profile))
+            temp_fort.calc_temp.compute_profile(self._A_param,
+                                                self._damping,
+                                                pressure_profile)
 
     @property
     def profile(self):
@@ -91,6 +101,7 @@ class ExampleTemperature(TemperatureProfile):
     def dampingFactor(self, value):
         self._damping = value
 
+
     @classmethod
     def input_keywords(cls):
-        return ['example', ]
+        return ['example_fortran', ]

@@ -1,0 +1,19 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module temp_fort ! in 
+    interface  ! in :temp_fort
+        module calc_temp ! in :temp_fort:taurex_fortran_plugin\src\temp_fort\calc_temp.f90
+            subroutine compute_profile(a_param,damping_param,pressure,nlayers,result) ! in :temp_fort:taurex_fortran_plugin\src\temp_fort\calc_temp.f90:calc_temp
+                real(8) intent(in) :: a_param
+                real(8) intent(in) :: damping_param
+                real(8) dimension(nlayers),intent(in) :: pressure
+                integer(kind=ik), optional,intent(in),check(len(pressure)>=nlayers),depend(pressure) :: nlayers=len(pressure)
+                real(8) dimension(nlayers),intent(out),depend(nlayers) :: result
+            end subroutine compute_profile
+        end module calc_temp
+    end interface 
+end python module temp_fort
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
